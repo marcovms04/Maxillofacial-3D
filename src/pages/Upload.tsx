@@ -77,6 +77,9 @@ const Upload: React.FC = () => {
     }
   };
 
+  // Obtener nombre de carpeta raíz para mostrar
+  const folderName = selectedFiles.length > 0 ? selectedFiles[0].webkitRelativePath.split('/')[0] : '';
+
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
@@ -104,8 +107,8 @@ const Upload: React.FC = () => {
             >
               <input
                 type="file"
-                webkitdirectory
-                directory
+                webkitdirectory="true"
+                directory="true"
                 multiple
                 accept=".dcm"
                 style={{ display: 'none' }}
@@ -120,7 +123,7 @@ const Upload: React.FC = () => {
               </Typography>
               {selectedFiles.length > 0 && (
                 <Typography variant="body2" color="inherit" sx={{ mt: 1 }}>
-                  Selected folder with {selectedFiles.length} files.
+                  Selected folder: {folderName} with {selectedFiles.length} files.
                 </Typography>
               )}
             </Button>
