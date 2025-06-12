@@ -104,8 +104,8 @@ const Upload: React.FC = () => {
             >
               <input
                 type="file"
-                webkitdirectory="true"
-                directory="true"
+                webkitdirectory
+                directory
                 multiple
                 accept=".dcm"
                 style={{ display: 'none' }}
@@ -184,4 +184,4 @@ const Upload: React.FC = () => {
   );
 };
 
-export default Upload; 
+export default Upload;
