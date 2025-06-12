@@ -27,7 +27,15 @@ const Upload: React.FC = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      const files = Array.from(event.target.files).filter(file => file.name.endsWith('.dcm'));
+      const maxSizeInBytes = 100 * 1024 * 1024; // 100MB
+      const files = Array.from(event.target.files).filter(file => {
+        if (!file.name.endsWith('.dcm')) return false;
+        if (file.size > maxSizeInBytes) {
+          setUploadMessage({ type: 'error', message: `File ${file.name} exceeds 100MB limit.` });
+          return false;
+        }
+        return true;
+      });
       setSelectedFiles(files);
     }
   };
@@ -57,7 +65,7 @@ const Upload: React.FC = () => {
     formData.append('printMaterial', printMaterial);
 
     try {
-      const response = await fetch('/api/upload-dicom-folder', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/upload-dicom-folder`, {
         method: 'POST',
         body: formData,
       });
@@ -65,13 +73,22 @@ const Upload: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         setUploadMessage({ type: 'success', message: 'Files uploaded successfully!' });
+        setSelectedFiles([]);
+        setAnatomicalStructure('');
+        setPrintMaterial('');
         navigate(`/processing/${result.process_id}`);
       } else {
         const errorData = await response.json();
-        setUploadMessage({ type: 'error', message: `Upload failed: ${errorData.message || 'Unknown error'}` });
+        setUploadMessage({
+          type: 'error',
+          message: `Upload failed: ${errorData.message || `HTTP ${response.status} error`}`,
+        });
       }
     } catch (error) {
-      setUploadMessage({ type: 'error', message: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setUploadMessage({
+        type: 'error',
+        message: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -93,6 +110,7 @@ const Upload: React.FC = () => {
               variant="contained"
               component="label"
               fullWidth
+              aria-label="Upload DICOM folder"
               sx={{
                 borderRadius: 2,
                 p: 3,
